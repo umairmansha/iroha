@@ -19,6 +19,7 @@
 #define IROHA_CLI_INTERACTIVE_CLI_HPP
 
 #include "crypto/keys_manager_impl.hpp"
+#include "interactive/interactive_multisig.hpp"
 #include "interactive/interactive_query_cli.hpp"
 #include "interactive/interactive_transaction_cli.hpp"
 
@@ -34,6 +35,7 @@ namespace iroha_cli {
           const std::string &account_name,
           uint64_t tx_counter,
           uint64_t qry_counter,
+          const CliClient &client,
           const std::shared_ptr<iroha::model::ModelCryptoProvider> &provider);
       /**
        * Run interactive cli. Print menu and parse command
@@ -60,8 +62,11 @@ namespace iroha_cli {
        */
       void startTx();
 
+      void startMultiSig();
+
       const std::string TX_CODE = "tx";
       const std::string QRY_CODE = "qry";
+      const std::string MULTI_CODE = "multi";
 
       /**
        * Account id of creator
@@ -71,6 +76,7 @@ namespace iroha_cli {
       // -- Query, tx cli --
       InteractiveTransactionCli tx_cli_;
       InteractiveQueryCli query_cli_;
+      InteractiveMultiSigCli multiSigCli_;
 
       /**
        * Main menu points

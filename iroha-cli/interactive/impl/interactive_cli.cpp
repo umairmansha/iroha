@@ -31,21 +31,29 @@ namespace iroha_cli {
                     QRY_CODE,
                     "New query",
                     &InteractiveCli::startQuery);
+      addCliCommand(menu_points_,
+                    main_handler_map_,
+                    MULTI_CODE,
+                    "Check uncompleted multisig transaction",
+                    &InteractiveCli::startMultiSig);
     }
 
     InteractiveCli::InteractiveCli(
         const std::string &account_name,
         uint64_t tx_counter,
         uint64_t qry_counter,
+        const CliClient &client,
         const std::shared_ptr<iroha::model::ModelCryptoProvider> &provider)
         : creator_(account_name),
           tx_cli_(creator_, tx_counter, provider),
-          query_cli_(creator_, qry_counter, provider) {
+          query_cli_(creator_, qry_counter, provider),
+          multiSigCli_(
+              creator_, qry_counter, client, provider) {
       assign_main_handlers();
     }
 
     void InteractiveCli::parseMain(std::string line) {
-      auto raw_command = parser::parseFirstCommand(line);
+      auto raw_command = parser::parseFirstCommand(std::move(line));
       if (not raw_command.has_value()) {
         handleEmptyCommand();
         return;
@@ -61,6 +69,8 @@ namespace iroha_cli {
     void InteractiveCli::startQuery() { query_cli_.run(); }
 
     void InteractiveCli::startTx() { tx_cli_.run(); }
+
+    void InteractiveCli::startMultiSig() { multiSigCli_.run(); }
 
     void InteractiveCli::run() {
       std::cout << "Welcome to Iroha-Cli. " << std::endl;
