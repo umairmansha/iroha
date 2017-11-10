@@ -24,7 +24,9 @@ jobs:
       - run:
           name: ccache setup
           command: |
-            ccache --max-files=0
+            ccache --version
+            ccache --show-stats
+            ccache --zero-stats
             ccache --max-size=1G
       - run:
           name: cmake
@@ -33,6 +35,11 @@ jobs:
           name: make
           command: |
             cmake --build $IROHA_BUILD -- -j4
+      - run:
+          name: ccache teardown
+          command: |
+            ccache --cleanup
+            ccache --show-stats
       - save_cache:
           key: build-cache-linux-{{ .Branch }}-{{ epoch }}
           paths:
@@ -157,7 +164,13 @@ jobs:
             - external-macos-
           paths:
             - external
-      - run: ccache --show-stats
+      - run:
+          name: ccache setup
+          command: |
+            ccache --version
+            ccache --show-stats
+            ccache --zero-stats
+            ccache --max-size=1G
       - run:
           name: build
           command: |
@@ -171,7 +184,11 @@ jobs:
           key: external-macos-{{ .Branch }}-{{ epoch }}
           paths:
             - external
-      - run: ccache --show-stats
+      - run:
+          name: ccache teardown
+          command: |
+            ccache --cleanup
+            ccache --show-stats
 
 
 workflows:
