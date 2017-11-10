@@ -25,8 +25,6 @@ namespace iroha {
     class WsvQueryCommandTest : public AmetsuchiTest {
      public:
       WsvQueryCommandTest() {
-        spdlog::set_level(spdlog::level::off);
-
         domain.domain_id = "domain";
         domain.default_role = role;
         account.domain_id = domain.domain_id;
@@ -177,7 +175,6 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
       }
     };
 
-
     /**
      * @given inserted role, domain
      * @when insert account with filled json data
@@ -188,6 +185,48 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
       auto acc = query->getAccount(account.account_id);
       ASSERT_TRUE(acc.has_value());
       ASSERT_EQ(account.json_data, acc.value().json_data);
+    }
+
+    /**
+     * @given inserted role, domain, account
+     * @when insert to account new json data
+     * @then get account and check json data is the same
+     */
+    TEST_F(AccountTest, InsertNewJSONDataAccount) {
+      ASSERT_TRUE(command->insertAccount(account));
+      ASSERT_TRUE(command->setAccountKV(account.account_id, "id", "val"));
+      auto acc = query->getAccount(account.account_id);
+      ASSERT_TRUE(acc.has_value());
+      ASSERT_EQ(R"({"id": "val", "key": "value"})", acc.value().json_data);
+    }
+
+    /**
+     * @given inserted role, domain, account
+     * @when insert to account new complex json data
+     * @then get account and check json data is the same
+     */
+    TEST_F(AccountTest, InsertNewComplexJSONDataAccount) {
+      ASSERT_TRUE(command->insertAccount(account));
+      ASSERT_TRUE(
+          command->setAccountKV(account.account_id, "id", "[val1, val2]"));
+      auto acc = query->getAccount(account.account_id);
+      ASSERT_TRUE(acc.has_value());
+      ASSERT_EQ(R"({"id": "[val1, val2]", "key": "value"})",
+                acc.value().json_data);
+    }
+
+    /**
+     * @given inserted role, domain, account
+     * @when update  json data in account
+     * @then get account and check json data is the same
+     */
+    TEST_F(AccountTest, UpdateAccountJSONData) {
+      ASSERT_TRUE(command->insertAccount(account));
+      ASSERT_TRUE(command->setAccountKV(account.account_id, "id", "val"));
+      ASSERT_TRUE(command->setAccountKV(account.account_id, "id", "val2"));
+      auto acc = query->getAccount(account.account_id);
+      ASSERT_TRUE(acc.has_value());
+      ASSERT_EQ(R"({"id": "val2", "key": "value"})", acc.value().json_data);
     }
 
     class AccountRoleTest : public WsvQueryCommandTest {
