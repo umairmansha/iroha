@@ -25,23 +25,7 @@ namespace shared_model {
 
     class StubHash : public Hash {
      public:
-      const std::string &blob() const override {
-        return string;
-      }
-
-      const std::string &hex() const override {
-        return string;
-      }
-
-      size_t size() const override {
-        return 0;
-      }
-
-      ModelType *copy() const override {
-        return new StubHash;
-      }
-
-      const std::string string = "";
+      StubHash() : Hash("") {}
     };
   }  // namespace crypto
 }  // namespace shared_model

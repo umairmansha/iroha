@@ -28,6 +28,8 @@ namespace shared_model {
      */
     class PublicKey : public Blob {
      public:
+      using Blob::Blob;
+
       std::string toString() const override {
         return detail::PrettyStringBuilder()
             .init("PublicKey")

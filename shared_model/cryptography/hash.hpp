@@ -30,6 +30,8 @@ namespace shared_model {
      */
     class Hash : public Blob {
      public:
+      Hash(std::string data) : Blob(data) {}
+
       std::string toString() const override {
         return detail::PrettyStringBuilder()
             .init("Hash")

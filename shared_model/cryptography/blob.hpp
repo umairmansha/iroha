@@ -20,30 +20,65 @@
 
 #include "interfaces/model_primitive.hpp"
 #include "utils/string_builder.hpp"
+#include "utils/lazy_initializer.hpp"
 
 namespace shared_model {
   namespace crypto {
+
+    static const std::string code = {'0',
+                                     '1',
+                                     '2',
+                                     '3',
+                                     '4',
+                                     '5',
+                                     '6',
+                                     '7',
+                                     '8',
+                                     '9',
+                                     'a',
+                                     'b',
+                                     'c',
+                                     'd',
+                                     'e',
+                                     'f'};
 
     /**
      * Blob interface present user-friendly blob for working with low-level
      * binary stuff. Its length is not fixed in compile time.
      */
     class Blob : public interface::ModelPrimitive<Blob> {
+     private:
+      template <typename Value>
+      using Lazy = detail::LazyInitializer<Value>;
+
      public:
+      Blob(std::string data) : data_(data), hex_([this] {
+        std::string res(size() * 2, 0);
+        auto ptr = data_;
+        for (uint32_t i = 0, k = 0; i < size(); i++) {
+          const auto front = (uint8_t)(ptr[i] & 0xF0) >> 4;
+          const auto back = (uint8_t)(ptr[i] & 0xF);
+          res[k++] = code[front];
+          res[k++] = code[back];
+        }
+        return res;
+      }){};
       /**
        * @return provides raw representation of blob
        */
-      virtual const std::string &blob() const = 0;
+      virtual const std::string &blob() const { return data_; }
 
       /**
        * @return provides human-readable representation of blob
        */
-      virtual const std::string &hex() const = 0;
+      virtual const std::string &hex() const {
+        return hex_.get();
+      }
 
       /**
        * @return size of raw representation of blob
        */
-      virtual size_t size() const = 0;
+      virtual size_t size() const { return data_.size(); };
 
       std::string toString() const override {
         return detail::PrettyStringBuilder()
@@ -67,6 +102,12 @@ namespace shared_model {
       [[deprecated]] BlobType makeOldModel() const {
         return BlobType::from_string(blob());
       }
+
+      Blob *copy() const override { return new Blob(data_); }
+
+     protected:
+      std::string data_;
+      Lazy<std::string> hex_;
     };
   }  // namespace crypto
 }  // namespace shared_model
