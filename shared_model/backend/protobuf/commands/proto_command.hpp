@@ -25,6 +25,7 @@
 #include "backend/protobuf/commands/proto_create_account.hpp"
 #include "backend/protobuf/commands/proto_create_asset.hpp"
 #include "backend/protobuf/commands/proto_create_domain.hpp"
+#include "backend/protobuf/commands/proto_create_role.hpp"
 #include "commands.pb.h"
 #include "interfaces/commands/command.hpp"
 #include "utils/lazy_initializer.hpp"
@@ -61,10 +62,8 @@ namespace shared_model {
        * @param command - proto instance
        */
       explicit Command(const iroha::protocol::Command &command)
-          : command_(command),
-            variant_(detail::makeLazyInitializer([this] {
-              return CommandVariantType(
-                  load<ProtoCommandListType>(command_));
+          : command_(command), variant_(detail::makeLazyInitializer([this] {
+              return CommandVariantType(load<ProtoCommandListType>(command_));
             })) {
         if (command.command_case()
             == iroha::protocol::Command::COMMAND_NOT_SET) {
@@ -73,9 +72,7 @@ namespace shared_model {
         }
       }
 
-      const CommandVariantType &get() const override {
-        return variant_.get();
-      }
+      const CommandVariantType &get() const override { return variant_.get(); }
 
       ModelType *copy() const override { return new Command(command_); }
 
