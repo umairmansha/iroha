@@ -21,6 +21,8 @@
 #include "interfaces/model_primitive.hpp"
 #include "utils/lazy_initializer.hpp"
 #include "utils/string_builder.hpp"
+#include <sstream>
+#include <iomanip>
 
 namespace shared_model {
   namespace crypto {
@@ -39,7 +41,7 @@ namespace shared_model {
      public:
       Blob(std::string data)
           : data_(data), hex_([this] {
-              std::stringstream ret;
+              std::ostringstream ret;
 
               for (std::string::size_type i = 0; i < data_.size(); ++i) {
                 ret << std::hex << std::setfill('0') << std::setw(2)
