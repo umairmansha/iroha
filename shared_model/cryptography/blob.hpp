@@ -19,28 +19,13 @@
 #define IROHA_SHARED_MODEL_BLOB_HPP
 
 #include "interfaces/model_primitive.hpp"
-#include "utils/string_builder.hpp"
 #include "utils/lazy_initializer.hpp"
+#include "utils/string_builder.hpp"
 
 namespace shared_model {
   namespace crypto {
 
-    static const std::string code = {'0',
-                                     '1',
-                                     '2',
-                                     '3',
-                                     '4',
-                                     '5',
-                                     '6',
-                                     '7',
-                                     '8',
-                                     '9',
-                                     'a',
-                                     'b',
-                                     'c',
-                                     'd',
-                                     'e',
-                                     'f'};
+    static const std::string code = "0123456789abcdef";
 
     /**
      * Blob interface present user-friendly blob for working with low-level
@@ -52,17 +37,17 @@ namespace shared_model {
       using Lazy = detail::LazyInitializer<Value>;
 
      public:
-      Blob(std::string data) : data_(data), hex_([this] {
-        std::string res(size() * 2, 0);
-        auto ptr = data_;
-        for (uint32_t i = 0, k = 0; i < size(); i++) {
-          const auto front = (uint8_t)(ptr[i] & 0xF0) >> 4;
-          const auto back = (uint8_t)(ptr[i] & 0xF);
-          res[k++] = code[front];
-          res[k++] = code[back];
-        }
-        return res;
-      }){};
+      Blob(std::string data)
+          : data_(data), hex_([this] {
+              std::stringstream ret;
+
+              for (std::string::size_type i = 0; i < data_.size(); ++i) {
+                ret << std::hex << std::setfill('0') << std::setw(2)
+                    << std::nouppercase
+                    << (int)data_[i];
+              }
+              return ret.str();
+            }){};
       /**
        * @return provides raw representation of blob
        */
@@ -71,9 +56,7 @@ namespace shared_model {
       /**
        * @return provides human-readable representation of blob
        */
-      virtual const std::string &hex() const {
-        return hex_.get();
-      }
+      virtual const std::string &hex() const { return hex_.get(); }
 
       /**
        * @return size of raw representation of blob
