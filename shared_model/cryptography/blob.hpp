@@ -18,11 +18,11 @@
 #ifndef IROHA_SHARED_MODEL_BLOB_HPP
 #define IROHA_SHARED_MODEL_BLOB_HPP
 
+#include <iomanip>
+#include <sstream>
 #include "interfaces/model_primitive.hpp"
 #include "utils/lazy_initializer.hpp"
 #include "utils/string_builder.hpp"
-#include <sstream>
-#include <iomanip>
 
 namespace shared_model {
   namespace crypto {
@@ -42,11 +42,10 @@ namespace shared_model {
       Blob(std::string data)
           : data_(data), hex_([this] {
               std::ostringstream ret;
+              ret << std::hex << std::setfill('0');
 
               for (std::string::size_type i = 0; i < data_.size(); ++i) {
-                ret << std::hex << std::setfill('0') << std::setw(2)
-                    << std::nouppercase
-                    << (int)data_[i];
+                ret << std::setw(2) << std::nouppercase << (int)data_[i];
               }
               return ret.str();
             }){};
