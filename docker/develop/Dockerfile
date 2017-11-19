@@ -19,7 +19,7 @@ RUN add-apt-repository -y ppa:git-core/ppa; \
 RUN apt-get -y --no-install-recommends install build-essential python-software-properties \
         automake libtool \
         # dev dependencies
-        libssl-dev zlib1g-dev libboost-all-dev libc6-dbg golang \
+        libssl-dev zlib1g-dev libc6-dbg golang \
         # CircleCI dependencies
         git ssh tar gzip ca-certificates python3 python3-pip python3-setuptools \
         # code coverage
@@ -39,6 +39,15 @@ RUN git clone https://gitlab.kitware.com/cmake/cmake.git /tmp/cmake; \
     make -j${PARALLELISM} -C /tmp/cmake; \
     make -C /tmp/cmake install; \
     rm -rf /tmp/cmake
+
+# install boost
+RUN git clone https://github.com/boostorg/boost /tmp/boost; \
+    (cd /tmp/boost ; git checkout 436ad1dfcfc7e0246141beddd11c8a4e9c10b146); \
+    (cd /tmp/boost ; git submodule init); \
+    (cd /tmp/boost ; git submodule update --recursive -j ${PARALLELISM}); \
+    (cd /tmp/boost ; /tmp/boost/bootstrap.sh); \
+    (cd /tmp/boost ; /tmp/boost/b2 cxxflags="-std=c++14" -j 8 --with-system --with-filesystem install); \
+    rm -rf /tmp/boost
 
 # install protobuf
 RUN git clone https://github.com/google/protobuf /tmp/protobuf; \
